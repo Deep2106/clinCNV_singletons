@@ -332,3 +332,21 @@ Deepak Bharti
 Clinical Bioinformatician 
 
 RCSI, Dublin
+
+---
+
+## License & Citation
+
+This pipeline is freely available for use and modification under the [APACHE License](LICENSE).
+
+**If you use or modify this pipeline in your work, please cite:**
+
+> Bharti D. *ClinCNV WES CNV Calling Pipeline*. RCSI, FutureNeuro Group (2026).
+> Available at: https://github.com/Deep2106/clinCNV_singletons.git
+
+You may also include the following acknowledgement in your methods section:
+
+> CNV calling was performed using a DSL2 Nextflow pipeline based on ClinCNV
+> (Bessonov et al. 2023), developed at RCSI (Bharti D, 2026).
+> VEP annotation used StructuralVariantOverlap with gnomAD-SV v4.1.
+> Sex was inferred from BAM files using ngs-bits SampleGender.
