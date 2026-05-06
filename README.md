@@ -110,7 +110,7 @@ chr1    370137  370737
 --input          # samplesheet CSV
 --fasta          # hg38 reference FASTA
 --fasta_fai      # hg38 FASTA index
---cnv_bed        # CNV target BED with gene names in col 4
+--cnv_bed        # CNV target BED with/without gene names in col 4
 --outdir         # output directory
 ```
 
@@ -126,11 +126,6 @@ chr1    370137  370737
 ```bash
 --run_rfilter    # true/false (default: false, requires run_vep=true)
 --gene_panel     # XLSX file with "Gene Symbol" column
-```
-
-### Optional  Trios/Duos
-```bash
---ped_file       # PED file for family-aware calling (optional)
 ```
 
 ### Optional  Incremental Runs
