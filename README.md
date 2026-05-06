@@ -37,7 +37,7 @@ samplesheet.csv
 ### Software
 - [Nextflow](https://nextflow.io/) ≥ 25.04.0
 - [Singularity](https://sylabs.io/singularity/) ≥ 3.8
-- Java 17
+- Java 17 or greater
 
 ### Containers (Singularity `.sif`)
 
