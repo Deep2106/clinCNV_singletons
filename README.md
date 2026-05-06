@@ -285,19 +285,6 @@ cnv-pipeline/
 
 ---
 
-## Standalone SLURM Scripts
-
-If the Nextflow pipeline encounters issues, standalone SLURM scripts are provided in `scripts/` to run each post-ClinCNV step independently:
-
-```bash
-# After ClinCNV output confirmed OK:
-sbatch scripts/1_make_vcf.slurm      # TSV → sorted VCF
-sbatch scripts/2_vep_annotate.slurm  # VEP annotation
-sbatch scripts/3_rfilter.slurm       # Gene panel filter
-```
-
-Edit paths at the top of each script before running.
-
 ---
 
 ## Troubleshooting
