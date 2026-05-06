@@ -291,9 +291,7 @@ cnv-pipeline/
 
 | Error | Cause | Fix |
 |---|---|---|
-| `Input BED file has to be sorted` | ngs-bits 2025_12 requires sorted input | `BedSort` added to pipeline  ensure latest `gc_annotate_bed.nf` |
 | `failed to map segment from shared object` | `/tmp` is noexec on compute nodes | `TMPDIR=$(pwd)/tmp` set in `clincnv.nf` |
-| `cannot open the connection` in ClinCNV | Container filesystem read-only | ClinCNV copied to work dir  ensure latest `clincnv.nf` |
 | `bcftools sort` mkdtemp fails | `/local/scratch` noexec | `-T .` flag in `sort_vcf.nf` |
 | VEP cache not found | Cache path wrong or not extracted | Extract `homo_sapiens_vep_115_GRCh38.tar.gz` |
 | R `library(tidyverse)` not found | Not installed in container | Use individual packages: `dplyr`, `tidyr`, `readr`, `stringr` |
