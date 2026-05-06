@@ -1,0 +1,33 @@
+process BED_COVERAGE {
+    tag "${meta.id}"
+    label 'process_low'
+
+    container params.containers.ngsbits
+
+    input:
+    tuple val(meta), path(bam), path(bai)
+    path  annotated_bed
+
+    output:
+    path "${meta.id}.cov", emit: cov
+    path "versions.yml",   emit: versions
+
+    script:
+    """
+    BedCoverage \\
+        -bam    ${bam} \\
+        -in     ${annotated_bed} \\
+        -min_mapq 5 \\
+        -decimals 4 > ontarget_${meta.id}.cov
+
+    # Strip the 4th column (GC content - not needed after annotation step)
+    head -n 1 ontarget_${meta.id}.cov > header.tmp
+    tail -n +2 ontarget_${meta.id}.cov | cut -f4 --complement > body.tmp
+    cat header.tmp body.tmp > ${meta.id}.cov
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        ngsbits: \$(BedCoverage --version 2>&1 | head -1 || echo "unknown")
+    END_VERSIONS
+    """
+}

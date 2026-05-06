@@ -1,0 +1,56 @@
+process CLINCNV {
+    tag "clincnv"
+    label 'process_high'
+
+    container params.containers.clincnv
+
+    publishDir "${params.outdir}/1_clincnv_output", mode: params.publish_dir_mode,
+        saveAs: { fn -> fn }
+
+    input:
+    path merged_cov
+    path annotated_bed
+    path ped_file
+
+    output:
+    path "cnv_output/",  emit: cnv_output
+    path "versions.yml", emit: versions
+
+    script:
+    def has_ped = ped_file.name != 'NO_FILE'
+    def trios_block = has_ped ? """
+    grep -v '^#' ${ped_file} | awk -F'\\t' '\$3!="0" && \$4!="0" {print \$2"\\t"\$3"\\t"\$4}' | tr '-' '.' > trios.txt
+    [ -s trios.txt ] && TRIOS_ARG="--triosFile \$(pwd)/trios.txt" || TRIOS_ARG=""
+    """ : "    TRIOS_ARG=\"\""
+    """
+    export TMPDIR=\$(pwd)/tmp
+    mkdir -p \${TMPDIR}
+    mkdir -p \$(pwd)/cnv_output
+
+    ${trios_block}
+
+    cp -r \${EBROOTCLINCNV}/. \$(pwd)/clincnv_run/
+
+    Rscript \$(pwd)/clincnv_run/clinCNV.R \\
+        --normal  \$(pwd)/${merged_cov} \\
+        --bed     \$(pwd)/${annotated_bed} \\
+        --out     \$(pwd)/cnv_output \\
+        --scoreG  ${params.clincnv_score_threshold} \\
+        --lengthG ${params.clincnv_min_length} \\
+        --maxNumGermCNVs ${params.clincnv_max_germ_cnvs} \\
+        --maxNumIter 5 \\
+        --numberOfThreads ${task.cpus} \\
+        --minimumNumOfElemsInCluster ${params.clincnv_min_cluster} \\
+        --hg38 \\
+        --noPlot \\
+        \${TRIOS_ARG}
+
+    echo "=== ClinCNV output count ==="
+    find \$(pwd)/cnv_output/normal -name "*_cnvs.tsv" 2>/dev/null | wc -l
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        clincnv: \$(git -C /opt/clincnv log --oneline -1 2>/dev/null || echo "unknown")
+    END_VERSIONS
+    """
+}

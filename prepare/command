@@ -1,0 +1,1 @@
+grep -Ff samples <(ls /home/data/human_genetics/Renal/Exomes/CeGaT_Project/BAM/*.markdup.recal.bam)
