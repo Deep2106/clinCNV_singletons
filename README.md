@@ -90,13 +90,13 @@ sbatch run_pipeline.slurm
 
 ## CNV Target BED
 
-Use the **CNV-specific** target BED (not the SNV padded BED). Must have gene names in column 4 (comma-separated):
+Use the **CNV-specific** target BED (not the SNV padded BED) :
 
 ```
-chr1    65564   65573   GENE1
-chr1    69036   70008   GENE1
-chr1    358066  358183  GENE2,GENE3
-chr1    370137  370737  backbone
+chr1    65564   65573   
+chr1    69036   70008   
+chr1    358066  358183  
+chr1    370137  370737 
 ```
 
 > **Do NOT use SNV padded BED**  padding dilutes coverage signal and inflates false positive CNV calls.
