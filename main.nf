@@ -252,7 +252,7 @@ workflow {
 
     /*
     ============================================================================
-        STAGE 4: ANNOTATION (VEP + R filter  both optional)
+        STAGE 4: ANNOTATION (VEP + R filter — both optional)
     ============================================================================
     */
 

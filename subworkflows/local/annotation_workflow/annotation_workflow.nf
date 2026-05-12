@@ -1,4 +1,4 @@
-include { VEP_ANNOTATE   } from '../../../modules/local/vep_annotate/vep_annotate'
+include { VEP_ANNOTATE   } from '../../../modules/local/vep_annotate/singleton_vep_annotate'
 include { RSCRIPT_FILTER } from '../../../modules/local/rscript_filter/rscript_filter'
 
 workflow ANNOTATION_WORKFLOW {

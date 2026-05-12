@@ -13,21 +13,30 @@ process CLINCNV {
     path ped_file
 
     output:
-    path "cnv_output/",  emit: cnv_output
+    path "cnv_output/",  emit: cnv_output_dir
     path "versions.yml", emit: versions
 
     script:
-    def has_ped = ped_file.name != 'NO_FILE'
-    def trios_block = has_ped ? """
-    grep -v '^#' ${ped_file} | awk -F'\\t' '\$3!="0" && \$4!="0" {print \$2"\\t"\$3"\\t"\$4}' | tr '-' '.' > trios.txt
-    [ -s trios.txt ] && TRIOS_ARG="--triosFile \$(pwd)/trios.txt" || TRIOS_ARG=""
-    """ : "    TRIOS_ARG=\"\""
     """
     export TMPDIR=\$(pwd)/tmp
     mkdir -p \${TMPDIR}
     mkdir -p \$(pwd)/cnv_output
 
-    ${trios_block}
+    # ── PED detection (bash only  empty file = singleton mode)
+    # trios.txt must be comma-separated: ClinCNV reads with sep=","
+    TRIOS_ARG=""
+    if [ -s ${ped_file} ]; then
+        grep -v '^#' ${ped_file} \\
+            | awk -F'\\t' '\$3!="0" && \$4!="0" {print \$2","\$3","\$4}' > trios.txt
+        if [ -s trios.txt ]; then
+            TRIOS_ARG="--triosFile \$(pwd)/trios.txt"
+            echo "INFO: Trio-aware mode -- \$(wc -l < trios.txt) complete trios"
+        else
+            echo "INFO: No complete trios found -- running GERMLINE_SINGLE"
+        fi
+    else
+        echo "INFO: No PED file -- running GERMLINE_SINGLE"
+    fi
 
     cp -r \${EBROOTCLINCNV}/. \$(pwd)/clincnv_run/
 
@@ -45,7 +54,7 @@ process CLINCNV {
         --noPlot \\
         \${TRIOS_ARG}
 
-    echo "=== ClinCNV output count ==="
+    echo "=== ClinCNV TSV count ==="
     find \$(pwd)/cnv_output/normal -name "*_cnvs.tsv" 2>/dev/null | wc -l
 
     cat <<-END_VERSIONS > versions.yml

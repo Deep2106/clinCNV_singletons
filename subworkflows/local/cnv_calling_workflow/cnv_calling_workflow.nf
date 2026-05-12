@@ -1,4 +1,4 @@
-include { CLINCNV  } from '../../../modules/local/clincnv/clincnv'
+include { CLINCNV  } from '../../../modules/local/clincnv/singleton_clincnv'
 include { MAKE_VCF } from '../../../modules/local/make_vcf/make_vcf'
 include { SORT_VCF } from '../../../modules/local/sort_vcf/sort_vcf'
 

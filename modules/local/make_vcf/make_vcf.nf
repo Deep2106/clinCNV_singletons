@@ -7,7 +7,7 @@ process MAKE_VCF {
     input:
     tuple val(meta), path(cnv_tsv)
     path  vcf_header
-    path  fasta_fai   // hg38.fasta.fai — staged alongside process for contig lines
+    path  fasta_fai   // hg38.fasta.fai  staged alongside process for contig lines
 
     output:
     tuple val(meta), path("${meta.id}.vcf"), emit: vcf
