@@ -245,6 +245,10 @@ If you use this pipeline, please cite:
 
 ## Author
 
-Deepak Bharti  Clinical Bioinformatician, RCSI Dublin
+Deepak Bharti, Clinical Bioinformatician, RCSI Dublin
+
+
+Contact:[deepakbharti@rcsi.com](deepakbharti@rcsi.com)
+
 
 > CNV calling was performed using a DSL2 Nextflow pipeline based on ClinCNV (Bessonov et al. 2023), developed at RCSI (Bharti D, 2026). VEP annotation used StructuralVariantOverlap with gnomAD-SV v4.1. Sex was inferred from BAM files using ngs-bits SampleGender.
