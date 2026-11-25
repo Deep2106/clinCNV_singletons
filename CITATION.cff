@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this pipeline, please cite it as below."
+type: software
+title: "ClinCNV CNV Calling Pipeline for Singletons"
+abstract: >-
+  Nextflow DSL2 pipeline for CNV discovery from
+  whole-exome sequencing data,using clinCNV.
+authors:
+  - family-names: "Bharti"
+    given-names: "Deepak"
+version: "1.0.0"
+date-released: "2026-05-28"
+license: Apache-2.0
+repository-code: "https://github.com/Deep2106/clinCNV_singletons"
+keywords:
+  - nextflow
+  - whole-exome sequencing
+  - CNV calling
+  - ClinCNV
+  - bioinformatics
