@@ -249,7 +249,6 @@ If you use this pipeline, please cite:
 
 If you use this pipeline in your work, please cite it:
 
-> Bharti D. *WGS Germline Variant Calling Pipeline* (version 3.0.0) [Computer software]. GitHub. `<repository-url>`
 
 BibTeX:
 
