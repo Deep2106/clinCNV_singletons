@@ -19,26 +19,18 @@ process BED_COVERAGE {
         -min_mapq 5 \\
         -decimals 4 > ontarget_${meta.id}.cov
 
-    # Detect annotated BED column count to determine what to strip
-    # 3-col original BED -> annotated = 4 cols -> body has chr,start,end,GC,cov
-    #   -> strip col 4 (GC)              -> output: chr,start,end,cov
-    # 4-col original BED -> annotated = 5 cols -> body has chr,start,end,gene,GC,cov
-    #   -> strip col 4 (gene) + col 5 (GC) -> output: chr,start,end,cov
-    BED_COLS=\$(awk 'NR==1 && !/^#/ {print NF; exit}' ${annotated_bed})
+    # ClinCNV .cov = chr,start,end,coverage (GC/gene come from --bed).
+    # Keep cols 1-3 + last column: width-independent of BED layout.
+    awk -F'\\t' 'BEGIN{OFS="\\t"} {print \$1,\$2,\$3,\$NF}' ontarget_${meta.id}.cov > ${meta.id}.cov
 
-    head -n 1 ontarget_${meta.id}.cov > header.tmp
-
-    if [ "\$BED_COLS" -ge 5 ]; then
-        # 4-col original BED: strip gene (col4) and GC (col5)
-        tail -n +2 ontarget_${meta.id}.cov | cut -f4,5 --complement > body.tmp
-    else
-        # 3-col original BED: strip GC only (col4)
-        tail -n +2 ontarget_${meta.id}.cov | cut -f4 --complement > body.tmp
+    # Guard: 4 cols, numeric coverage, non-empty
+    if ! awk -F'\\t' 'NF!=4 || (NR>1 && \$4!=\$4+0) {exit 1} END {if (NR<2) exit 1}' ${meta.id}.cov; then
+        echo "ERROR: malformed ${meta.id}.cov" >&2
+        head -3 ${meta.id}.cov >&2
+        exit 1
     fi
 
-    cat header.tmp body.tmp > ${meta.id}.cov
-
-    rm -f ontarget_${meta.id}.cov header.tmp body.tmp
+    rm -f ontarget_${meta.id}.cov
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

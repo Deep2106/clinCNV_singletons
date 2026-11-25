@@ -22,7 +22,7 @@ process CLINCNV {
     mkdir -p \${TMPDIR}
     mkdir -p \$(pwd)/cnv_output
 
-    # ── PED detection (bash only  empty file = singleton mode)
+    # - PED detection (bash only — empty file = singleton mode)
     # trios.txt must be comma-separated: ClinCNV reads with sep=","
     TRIOS_ARG=""
     if [ -s ${ped_file} ]; then

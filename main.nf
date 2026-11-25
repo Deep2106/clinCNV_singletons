@@ -49,10 +49,12 @@ def helpMessage() {
         --outdir            Output directory (default: ./results)
 
     VEP Annotation (--run_vep true):
-        --vep_cache         VEP cache directory
-        --vep_plugins       VEP plugins directory
-        --vep_cache_version VEP cache version (default: 107)
-        --sv_overlap_vcf    1000G SV VCF for StructuralVariantOverlap plugin
+        --vep_cache         VEP cache directory (cache version auto-detected)
+        --sv_overlap_vcf    gnomAD-SV v4.1 DEL/DUP VCF built by assets/prepare_gnomad_sv.sh
+                            (gnomad.v4.1.sv.sites.DELDUP.noME.vcf.gz, .tbi alongside)
+        --vep_sv_plugin     Patched StructuralVariantOverlap.pm
+                            (default: assets/vep_plugins/StructuralVariantOverlap.pm)
+        --sv_overlap_pct    Min % of CNV covered by one gnomAD SV (default: 80)
 
     Gene Panel Filter (--run_rfilter true, requires --run_vep true):
         --gene_panel        Gene panel XLSX with 'Gene Symbol' column
@@ -124,8 +126,13 @@ def validateParameters() {
 
     if (params.run_vep) {
         if (!params.vep_cache)       errors << "ERROR: --vep_cache required when --run_vep true"
-        if (!params.vep_plugins)     errors << "ERROR: --vep_plugins required when --run_vep true"
         if (!params.sv_overlap_vcf)  errors << "ERROR: --sv_overlap_vcf required when --run_vep true"
+        if (!file(params.vep_sv_plugin).exists())
+            errors << "ERROR: patched VEP plugin not found: ${params.vep_sv_plugin}"
+        else if (!file(params.vep_sv_plugin).text.contains('PATCH: avoid chrchr'))
+            errors << "ERROR: ${params.vep_sv_plugin} is not the patched StructuralVariantOverlap.pm"
+        if (params.sv_overlap_vcf && !file("${params.sv_overlap_vcf}.tbi").exists())
+            errors << "ERROR: index not found: ${params.sv_overlap_vcf}.tbi"
     }
 
     if (errors) {
@@ -155,6 +162,7 @@ log.info """
 ║  ClinCNV min cluster: ${params.clincnv_min_cluster}
 ║  Run VEP            : ${params.run_vep}
 ║  Run R filter       : ${params.run_rfilter}
+║  gnomAD-SV VCF      : ${params.run_vep ? params.sv_overlap_vcf : 'N/A'}
 ║  Gene panel         : ${params.gene_panel ?: 'N/A'}
 ║  Output directory   : ${params.outdir}
 ╚═══════════════════════════════════════════════════════════════════╝
@@ -257,7 +265,7 @@ workflow {
     */
 
     ch_vep_cache      = params.run_vep ? Channel.value(file(params.vep_cache,      checkIfExists: true)) : Channel.value(file("${projectDir}/assets/NO_FILE"))
-    ch_vep_plugins    = params.run_vep ? Channel.value(file(params.vep_plugins,    checkIfExists: true)) : Channel.value(file("${projectDir}/assets/NO_FILE"))
+    ch_vep_sv_plugin  = params.run_vep ? Channel.value(file(params.vep_sv_plugin,  checkIfExists: true)) : Channel.value(file("${projectDir}/assets/NO_FILE"))
     ch_sv_overlap     = params.run_vep ? Channel.value(file(params.sv_overlap_vcf, checkIfExists: true)) : Channel.value(file("${projectDir}/assets/NO_FILE"))
     ch_sv_overlap_tbi = params.run_vep ? Channel.value(file("${params.sv_overlap_vcf}.tbi", checkIfExists: true)) : Channel.value(file("${projectDir}/assets/NO_FILE"))
     ch_gene_panel     = params.run_rfilter ? Channel.value(file(params.gene_panel, checkIfExists: true)) : Channel.value(file("${projectDir}/assets/NO_FILE"))
@@ -266,7 +274,7 @@ workflow {
     ANNOTATION_WORKFLOW(
         ch_sorted_vcf,
         ch_vep_cache,
-        ch_vep_plugins,
+        ch_vep_sv_plugin,
         ch_sv_overlap,
         ch_sv_overlap_tbi,
         ch_gene_panel,
@@ -274,6 +282,12 @@ workflow {
     )
 
     ch_versions = ch_versions.mix(ANNOTATION_WORKFLOW.out.versions)
+
+    // Cohort table of gnomAD-SV overlap rates (sample, total, with_overlap, fraction)
+    ANNOTATION_WORKFLOW.out.sv_qc
+        .map { meta, f -> f.text }
+        .collectFile(name: 'sv_overlap_qc.tsv', storeDir: "${params.outdir}/pipeline_info",
+                     seed: "sample_id\ttotal_cnvs\tcnvs_with_overlap\tfraction\n", sort: true)
 
     /*
     ============================================================================
