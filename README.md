@@ -253,7 +253,7 @@ If you use this pipeline in your work, please cite it:
 BibTeX:
 
 ```bibtex
-@software{bharti_wgs_germline_pipeline,
+@software{bharti_clinCNV_singletons_pipeline,
   author  = {Bharti, Deepak},
   title   = { ClinCNV CNV Calling Pipeline for singletons},
   version = {1.0.0},
